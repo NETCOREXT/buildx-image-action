@@ -1,0 +1,1 @@
+# buildx-image-action
