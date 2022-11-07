@@ -1,0 +1,43 @@
+name: 'Build Image'
+description: 'Build app image'
+
+inputs:
+  image:
+    required: true
+    description: "Image Name"
+  tag:
+    required: true
+    description: "Image tag"
+  tag-hash:
+    required: true
+    description: "Image tag of the hash"
+  tag-latest:
+    required: true
+    description: 'Image tag of the latest'
+  build-arg:
+    description: 'Build arguments'
+  path:
+    description: "Context path"
+    default: "."
+  platforms:
+    description: "Platforms"
+    default: "linux/amd64,linux/arm64"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        platforms: ${{ inputs.platforms }}
+    - name: Build Images
+      shell: bash
+      run: |
+        docker buildx build --platform=${{ inputs.platforms }} --output=type=registry \
+        ${{ inputs.build-arg }} \
+        -t ${{ inputs.image }}:${{ inputs.tag }} \
+        -t ${{ inputs.image }}:${{ inputs.tag-hash }} \
+        -t ${{ inputs.image }}:${{ inputs.tag-latest }} \
+        ${{ inputs.path }}
